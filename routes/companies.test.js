@@ -96,14 +96,11 @@ describe("GET /companies/:code", () => {
 
 describe("POST /companies", () => {
     test("Creating a new company", async () => {
-        let company = { code: "goog", name: "Google", description: "a really big company" };
+        let company = { name: "Google", description: "a really big company" };
         const res = await request(app).post("/companies").send(company);
         expect(res.statusCode).toBe(201);
+        company = { code: expect.any(String), name: "Google", description: "a really big company" }
         expect(res.body).toEqual({ company: company });
-    })
-    test("Responds with 500 if code is missing", async () => {
-        const res = await request(app).post("/companies").send({ name: "Google", description: "a really big company" });
-        expect(res.statusCode).toBe(500);
     })
     test("Responds with 500 if name is missing", async () => {
         const res = await request(app).post("/companies").send({ code: "goog", description: "a really big company" });

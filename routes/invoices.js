@@ -71,12 +71,21 @@ router.patch('/:id', async (req, res, next) => {
     try {
         if ("id" in req.body) throw new ExpressError('NOT ALLOWED', 400);
         if (!req.body.amt) throw new ExpressError('INVOICE NEEDS AN AMOUNT');
-        const result = await db.query(`UPDATE invoices SET amt=$1 WHERE id=$2 RETURNING *`,
-            [req.body.amt, req.params.id]);
 
-        if (result.rows.length === 0) throw new ExpressError(`No invoice with an id of ${req.params.id}`, 404);
-        return res.json({ invoice: result.rows[0] });
+        if (req.body.paid === true) {
 
+            const result = await db.query(`UPDATE invoices SET amt=$1, paid=$3, paid_date=CURRENT_DATE WHERE id=$2 RETURNING *`,
+                [req.body.amt, req.params.id, req.body.paid]);
+
+            if (result.rows.length === 0) throw new ExpressError(`No invoice with an id of ${req.params.id}`, 404);
+            return res.json({ invoice: result.rows[0] });
+        } else if (req.body.paid === false) {
+            const result = await db.query(`UPDATE invoices SET amt=$1, paid=$3, paid_date=$4 WHERE id=$2 RETURNING *`,
+                [req.body.amt, req.params.id, req.body.paid, null]);
+            if (result.rows.length === 0) throw new ExpressError(`No invoice with an id of ${req.params.id}`, 404);
+            return res.json({ invoice: result.rows[0] });
+        }
+        if (!req.body.paid) throw new ExpressError('HAS INVOICE BEEN PAID?');
     } catch (e) {
         return next(e);
     }

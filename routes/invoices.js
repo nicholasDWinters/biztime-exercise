@@ -53,7 +53,7 @@ router.post('/', async (req, res, next) => {
         if (!req.body.amt) throw new ExpressError('INVOICE NEEDS AN AMOUNT');
 
         const company = await db.query(`SELECT * FROM companies WHERE code = $1`, [req.body.comp_code]);
-        if (company.rows.length === 0) throw new ExpressError('COMPANY DOES NOT EXIST!');
+        if (company.rows.length === 0) throw new ExpressError('COMPANY DOES NOT EXIST!', 404);
 
         const result = await db.query(`INSERT INTO invoices (comp_code, amt) VALUES ($1, $2) RETURNING *`,
             [req.body.comp_code, req.body.amt]);
